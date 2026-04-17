@@ -1,10 +1,9 @@
 <?php
-
-$monthconvert = array("January"=>1,"Febuary"=>2,"March"=>3,"April"=>4,"May"=>5,"June"=>6,"July"=>7,"August"=>8,"September"=>9,"October"=>10,"November"=>11,"December"=>12);
+$monthconvert=array("January"=>1,"Febuary"=>2,"March"=>3,"April"=>4,"May"=>5,"June"=>6,"July"=>7,"August"=>8,"September"=>9,"October"=>10,"November"=>11,"December"=>12);
 $LinkClicked = isset($_GET['month']);
-$FormFilled - ($_SERVER['REQUEST_METHOD']=== 'POST');
+$FormFilled = ($_SERVER['REQUEST_METHOD']=== 'POST');
 
-if(FormFilled==True)
+if($FormFilled==True)
 {
 $month= $_POST['month'];
 $month= $_POST['day'];
@@ -14,7 +13,7 @@ $month= $_POST['minute'];
 $month= $_POST['ampm'];
 }
 
-if($LinkClick==True)
+if($LinkClicked==True)
 {
 $day = preg_replace( '/[a-zA-Z]/', '', $_POST['Day']); 
 $month = preg_replace( '/[^a-zA-Z]/', '', $_POST['Month']);
@@ -26,18 +25,14 @@ $ampm = preg_replace( '/[^a-zA-Z]/', '', $_POST['AM/PM']);
 
 function FancyPrint ($month, $day, $year, $hour, $minute, $ampm)
 {
- return(date("l F jS, y - g:ia",mktime($hour, $min, 0, $month, $day, $year));
+ return date("l F jS, y - g:ia",mktime($hour, $min, 0, $month, $day, $year));
 }
 function IsoPrinter ($month, $day, $year, $hour, $minute, $ampm)
 {
- return(date("c, mktime($hour, $min, 0, $month, $day, $year));
+ return date("c", mktime($hour, $min, 0, $month, $day, $year));
 }
 
-
-
-
 ?>
-
 
 <!DOCTYPE html>
 <html lang="en">
@@ -50,7 +45,7 @@ function IsoPrinter ($month, $day, $year, $hour, $minute, $ampm)
 	</head>
 	<body>
 		<h>Birthday Formatter</h>
-		<form method="POST" action="<?php echo ($_SERVER['PHP_SELF']); ?>">
+		<form method="POST" action="<?php echo htmlspecialchars($_SERVER['PHP_SELF']); ?>">
 		<table border=2>
 		<tr>
 		<th>Month</th>
@@ -69,6 +64,7 @@ function IsoPrinter ($month, $day, $year, $hour, $minute, $ampm)
 		{
 		 echo "<option value=".$num."> ".$name."</options>";
 		}
+		?>
 		</select>
 		</th>
 		<th>
@@ -114,8 +110,8 @@ function IsoPrinter ($month, $day, $year, $hour, $minute, $ampm)
 		<th>
 		<select name="AM/PM">
 		<?php
-		echo "<option value=\"AM"\">""</option>\n";
-		echo "<option value=\"PM"\">""</option>\n";
+		echo "<option value="."AM".">"."AM"."</option>";
+		echo "<option value="."PM".">"."PM"."</option>";
 		?>
 		</select>
 		</th>
@@ -127,10 +123,10 @@ function IsoPrinter ($month, $day, $year, $hour, $minute, $ampm)
 		
 		</form>
 		
-		<?php if(FormFilled==True)
+		<?php if($FormFilled==True)
 		{
-		 echo FancyPrint(date($hour, $minute, $month, $day, $year, $ampm) 
-		 echo "<a href='PHPCH78.php?month=$month&day=$day,year=$year,hour=$hour,minute=$minute,ampm=$ampm'>"."Show ISO"."</a>"
+		 echo FancyPrint($hour, $minute, $month, $day, $year, $ampm); 
+		 echo "<a href='PHPCH78.php?month=$month&day=$day&year=$year&hour=$hour&minute=$minute&ampm=$ampm'>"."Show ISO"."</a>";
 		 $FormFilled=False;
 		}?>
 		
