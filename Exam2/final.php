@@ -87,7 +87,7 @@ function showGroupList()
 function showSyslog()
 {
     $file = "/var/log/syslog";
-    if(!file_exists($file))//It recognizes that the file exists, but does not read anything??
+    if(!file_exists($file))//Had to change syslog permission to access but does work otherwise
     {
         echo "<p><b>Error:</b> Cannot read $file.</p>";
         return;
@@ -98,16 +98,20 @@ function showSyslog()
     $lines = file($file, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
     foreach($lines as $line)
      {
-        $f = explode(" ", $line);//Delimit
-        if(count($f) >= 4)
-        {
-         echo "<tr>";
-         echo "<td>" . htmlspecialchars(date('M-d h:i:s',strtotime($f[0])))."</td>"; 
-         echo "<td>" . htmlspecialchars($f[1])."</td>"; 
-         echo "<td>" . htmlspecialchars($f[2])."</td>"; 
-         echo "<td>" . htmlspecialchars(trim($f[3]))."</td>"; 
-         echo "</tr>";
-        }
+        $parts = preg_split('/\s+/',$line,5);
+        if (count($parts) < 5) continue;
+         $date = "{$parts[0]} {$parts[1]} {$parts[2]}";
+         $host = $parts[3];
+         $appmsg = explode(":",$parts[4],2);
+         $app = $appmsg[0];
+         $message = trim($appmsg[1] ?? "");
+	 
+	 echo "<tr>";
+	 echo "<td>". htmlspecialchars($date) ."</td>";
+	 echo "<td>". htmlspecialchars($host) ."</td>";
+	 echo "<td>". htmlspecialchars($app) ."</td>";
+	 echo "<td>". htmlspecialchars($message) ."</td>";
+	 echo "</tr>";
      }
     echo "</table>";
 }
