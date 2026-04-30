@@ -1,6 +1,6 @@
 <?php
 session_start();
-function readAuthDB($file)
+function readAuthFile($file)
 {
     $users = array();
     if(file_exists($file))
@@ -16,15 +16,15 @@ function readAuthDB($file)
     return $users;
 }
 
-function authenticate($username, $password)
+function Authentication($username, $password)
 {
-    $users = readAuthDB("auth.db");
+    $users = readAuthFile("auth.db");
     if(isset($users[$username]))
         return password_verify($password, $users[$username]);
     return false;
 }
 
-function showUserList()
+function showUserList()//This stupid thing breaks when fidding with something completely unrelated
 {
     $file = "/etc/passwd";
     if(!file_exists($file))
@@ -41,8 +41,8 @@ function showUserList()
     $lines = file($file, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
     foreach($lines as $line)
     {
-        $f = explode(":", $line);
-        if(count($f) < 7) continue;
+        $f = explode(":", $line);//This is the delimiting part, don't forget
+        if(count($f) < 7) continue;//A regular if statement doesn't want to work here 
         echo "<tr>";
         echo "<td>" . htmlspecialchars($f[0])       . "</td>";
         echo "<td>" . htmlspecialchars($f[1])       . "</td>"; 
@@ -70,14 +70,16 @@ function showGroupList()
     $lines = file($file, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
     foreach($lines as $line)
     {
-        $f = explode(":", $line);
-        if(count($f) < 4) continue;
-        echo "<tr>";
-        echo "<td>" . htmlspecialchars($f[0])."</td>"; 
-        echo "<td>" . htmlspecialchars($f[1])."</td>"; 
-        echo "<td>" . htmlspecialchars($f[2])."</td>"; 
-        echo "<td>" . htmlspecialchars(trim($f[3]))."</td>"; 
-        echo "</tr>";
+        $f = explode(":", $line);//Delimit
+        if(count($f) >= 4)
+        {
+         echo "<tr>";
+         echo "<td>" . htmlspecialchars($f[0])."</td>"; 
+         echo "<td>" . htmlspecialchars($f[1])."</td>"; 
+         echo "<td>" . htmlspecialchars($f[2])."</td>"; 
+         echo "<td>" . htmlspecialchars(trim($f[3]))."</td>"; 
+         echo "</tr>";
+        }
     }
     echo "</table>";
 }
@@ -85,17 +87,28 @@ function showGroupList()
 function showSyslog()
 {
     $file = "/var/log/syslog";
-    if(!file_exists($file))
+    if(!file_exists($file))//It recognizes that the file exists, but does not read anything??
     {
-        echo "<p><b>Error:</b> Cannot read $file &mdash; file missing or permission denied.</p>";
+        echo "<p><b>Error:</b> Cannot read $file.</p>";
         return;
     }
     echo "<h2>Syslog</h2>";
     echo "<table border=1>";
-    echo "<tr><th>Entry</th></tr>";
+    echo "<tr><th>Date</th><th>Host Name</th><th>Application[PID]</th><th>Message</th></tr>";
     $lines = file($file, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
     foreach($lines as $line)
-        echo "<tr><td>".htmlspecialchars($line)."</td></tr>";
+     {
+        $f = explode(" ", $line);//Delimit
+        if(count($f) >= 4)
+        {
+         echo "<tr>";
+         echo "<td>" . htmlspecialchars(date('M-d h:i:s',strtotime($f[0])))."</td>"; 
+         echo "<td>" . htmlspecialchars($f[1])."</td>"; 
+         echo "<td>" . htmlspecialchars($f[2])."</td>"; 
+         echo "<td>" . htmlspecialchars(trim($f[3]))."</td>"; 
+         echo "</tr>";
+        }
+     }
     echo "</table>";
 }
 
@@ -107,7 +120,7 @@ if($FormFilled)
     $username = preg_replace('/[^a-zA-Z0-9]/', '', $_POST['username']);
     $password = $_POST['password'];
 
-    if(authenticate($username, $password))
+    if(Authentication($username, $password))
     {
         $_SESSION['loggedin'] = true;
         $_SESSION['username'] = $username;
@@ -118,9 +131,9 @@ if($FormFilled)
     }
 }
 
-$loggedIn   = isset($_SESSION['loggedin']) && $_SESSION['loggedin'] === true;
-$page       = isset($_GET['page']) ? (int)$_GET['page'] : null;
-$validPages = array(1, 2, 3);
+$LoggedIn= isset($_SESSION['loggedin']) && $_SESSION['loggedin'] === true;
+$page= isset($_GET['page']) ? (int)$_GET['page'] : null;
+$validPages= array(1, 2, 3);
 
 ?>
 <!DOCTYPE html>
@@ -138,18 +151,17 @@ $validPages = array(1, 2, 3);
         hr    { margin: 6px 0; }
         ul    { margin: 4px 0 4px 20px; }
         li    { margin: 2px 0; }
-        a     { color: #551A8B; } /* match browser default visited/unvisited purple */
+        a     { color: #551A8B; }
         .error { color: red; font-weight: bold; }
-        input[type="text"], input[type="password"] { font-size: 1em; }
     </style>
 </head>
 <body>
 
 <h1>CPSC222 Final Exam</h1>
 
-<?php if($loggedIn): ?>
+<?php if($LoggedIn): ?>
 
-    <b>Welcome, <?php echo htmlspecialchars($_SESSION['username']); ?>!
+    <b>Welcome, <?php echo htmlspecialchars($_SESSION['username']); ?><!Don't have to fight with this if use endif>
     (<a href="final_logout.php">Log Out</a>)</b>
     <br/>
 
@@ -164,9 +176,9 @@ $validPages = array(1, 2, 3);
             echo "<p class='error'>Error: Invalid page."
                . "Please select a valid report from the Dashboard.</p>";
         }
-        elseif($page == 1) { showUserList();  }
-        elseif($page == 2) { showGroupList(); }
-        elseif($page == 3) { showSyslog();    }
+        elseif($page == 1) { showUserList();}
+        elseif($page == 2) { showGroupList();}
+        elseif($page == 3) { showSyslog();}
         ?>
 
     <?php else: ?>
@@ -179,7 +191,7 @@ $validPages = array(1, 2, 3);
             <li><a href="final.php?page=3">Syslog</a></li>
         </ul>
 
-    <?php endif; ?><!THIS IS SO MUCH EASIER THAN GETTING MAD OVER MISSING PARENTHESIS>
+    <?php endif; ?><!THIS IS SO MUCH EASIER THAN FIGHTING SPECIAL CHARS THING>
 
 <?php else: ?>
 
